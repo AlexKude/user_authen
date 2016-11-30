@@ -28,7 +28,7 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="user_auten" target="1.5" />
-      <module name="user_authen" target="1.5" />
+      <module name="user_authen" target="1.7" />
     </bytecodeTargetLevel>
   </component>
 </project>

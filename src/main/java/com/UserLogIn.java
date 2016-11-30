@@ -7,11 +7,9 @@ import com.service.UserService;
 import com.user.Role;
 import com.user.User;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -21,33 +19,37 @@ public class UserLogIn {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+
         while (true) {
             System.out.println("<=========================>");
             System.out.println("What would You like to do?");
             System.out.println("Type LOGIN for login");
             System.out.println("Type LIST for list of users");
             System.out.println("Type EXIT for exit");
+
             String choice = scanner.nextLine().trim();
 
-            if (choice.equals("LOGIN")) {
-                login(scanner);
-            } else if (choice.equals("LIST")) {
-                Map<String, User> users = UserRepo.users;
-                if (!users.isEmpty()) {
-                    for (Map.Entry entry : users.entrySet()) {
-                        User value = (User) entry.getValue();
-                        System.out.println("User: " + value.getSurname() + " " + value.getName() + " " + value.getRole());
+            switch (choice) {
+                case "LOGIN":
+                    login(scanner);
+                    break;
+                case "LIST":
+                    UserRepo userRepo = new UserRepo();
+                    List<User> allUsers = userRepo.findAllUsers();
+                    if (allUsers.isEmpty()) {
+                        System.out.println("No active users found");
+                    } else {
+                        for (User user : allUsers) {
+                            System.out.println("User: " + user.getSurname() + " " + user.getName() + " " + user.getRole().toString());
+                        }
                     }
-                } else {
-                    System.out.println("There is no active users");
-                }
-            } else if (choice.equals("EXIT")) {
-                System.exit(0);
-            } else {
-                continue;
+                    break;
+                case "EXIT":
+                    System.exit(0);
             }
         }
     }
+
 
     public static void login(Scanner scanner) {
 
@@ -60,23 +62,24 @@ public class UserLogIn {
             System.out.println("Do Yor like create user or find existing?");
             System.out.println("Please type CREATE or FIND");
             choice = scanner.nextLine().trim();
+
             if (choice.equals("CREATE")) {
                 user = repo.createUser(scanner);
+                if (user == null) {
+                    continue;
+                }
                 break;
             } else if (choice.equals("FIND")) {
                 user = repo.findUser(scanner);
                 if (user == null) {
                     System.out.println("User not found");
                     continue;
-                } else {
-                    break;
                 }
-            } else {
-                continue;
+                break;
             }
         }
 
-        findAvailableServeces(user.getRole());
+        findAvailableServices(user.getRole());
         System.out.println("Type LOGOUT for logout");
 
         Class<? extends UserService> userClass = userService.getClass();
@@ -95,9 +98,7 @@ public class UserLogIn {
                     if (serviceAnno.name().equals(choice)) {
                         try {
                             method.invoke(userService);
-                        } catch (IllegalAccessException e) {
-
-                        } catch (InvocationTargetException e) {
+                        } catch (Exception ignored) {
 
                         }
                     }
@@ -106,10 +107,11 @@ public class UserLogIn {
         }
     }
 
-    public static void findAvailableServeces(Role role) {
+
+    public static void findAvailableServices(Role role) {
         UserService userService = new UserService();
         Class<? extends UserService> userClass = userService.getClass();
-        List<String> availableServices = new ArrayList<String>();
+        List<String> availableServices = new ArrayList<>();
         Method[] methods = userClass.getDeclaredMethods();
         UserRoleAnnotation roleAnno;
         ServiceName serviceAnno;
@@ -122,7 +124,6 @@ public class UserLogIn {
                 for (Role rl : value) {
                     if (rl.equals(role)) {
                         availableServices.add(serviceAnno.name());
-                        continue;
                     }
                 }
             }

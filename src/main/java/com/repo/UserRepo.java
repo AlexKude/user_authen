@@ -3,10 +3,15 @@ package com.repo;
 import com.user.Role;
 import com.user.User;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -14,11 +19,37 @@ import java.util.Scanner;
  */
 public class UserRepo {
 
-    public static Map<String, User> users = new HashMap<String, User>();
+    private String driver;
+    private String url;
+    private String user;
+    private String password;
+
+    public UserRepo() {
+        init();
+    }
+
+    private void init() {
+        try {
+            this.driver = "org.postgresql.Driver";
+            this.url = "jdbc:postgresql://localhost:5432/UserDB";
+            this.user = "postgres";
+            this.password = "postgres";
+            Class.forName(this.driver);
+        } catch (ClassNotFoundException e) {
+            System.out.println("JDBC driver not found!");
+        }
+    }
+
 
     public User createUser(Scanner scanner) {
         System.out.println("Enter your login");
         String login = scanner.nextLine().trim();
+
+        if (!checkLogin(login)) {
+            System.out.println("This login is already in use. Please try other one");
+            return null;
+        }
+
         System.out.println("Enter your Family name");
         String surname = scanner.nextLine().trim();
         System.out.println("Enter your First name");
@@ -37,28 +68,78 @@ public class UserRepo {
             }
         }
 
-        User user = new User(name, surname, date);
+        User user = new User(login, name, surname, date);
         user = this.updateUser(user, scanner);
-        users.put(login, user);
+        try {
+            Connection connection = DriverManager.getConnection(this.url, this.user, this.password);
+            Statement statement = connection.createStatement();
+            String insertUser = "INSERT INTO userdb.usertable (login, surname, name, age, role) VALUES ('" + user.getLogin() + "', '" + user.getSurname() +
+                    "', '" + user.getName() + "', " + user.getAge() + ", '" + user.getRole().toString() + "')";
+            statement.execute(insertUser);
+            connection.close();
+
+        } catch (SQLException e) {
+            System.out.println("failed to connect Data Base.");
+            return null;
+        }
         return user;
     }
 
+
     public User findUser(Scanner scanner) {
+        Role role = null;
         User user = null;
         System.out.println("Enter your login");
         String login = scanner.nextLine().trim();
 
-        for (Map.Entry entry : users.entrySet()) {
-            if (entry.getKey().equals(login)) {
-                user = (User) entry.getValue();
+        try {
+            Connection connection = DriverManager.getConnection(this.url, this.user, this.password);
+            Statement statement = connection.createStatement();
+            String query = "SELECT * FROM userdb.usertable WHERE login = '" + login + "'";
+            ResultSet resultSet = statement.executeQuery(query);
+            if(resultSet.next()) {
+                user = new User();
+                user.setLogin(resultSet.getString("login"));
+                user.setSurname(resultSet.getString("surname"));
+                user.setName(resultSet.getString("name"));
+                user.setAge(resultSet.getInt("age"));
+                switch (resultSet.getString("role")) {
+                    case "USER":
+                        role = Role.USER;
+                        break;
+                    case "SUPER_USER":
+                        role = Role.SUPER_USER;
+                        break;
+                    case "ADMIN":
+                        role = Role.ADMIN;
+                        break;
+                }
+                user.setRole(role);
             }
+            if (user == null) {
+                return null;
+            }
+            resultSet.close();
+            connection.close();
+
+        } catch (SQLException e) {
+             return null;
         }
-        if (user != null) {
-            user = this.updateUser(user, scanner);
-            users.put(login, user);
-            return user;
-        } else return null;
+        user = this.updateUser(user, scanner);
+        try {
+            Connection connection = DriverManager.getConnection(this.url, this.user, this.password);
+            Statement statement = connection.createStatement();
+            String insertUser = "UPDATE userdb.usertable SET role = '" + user.getRole().toString() + "' WHERE login = '" + user.getLogin() + "'";
+            statement.execute(insertUser);
+            connection.close();
+
+        } catch (SQLException e) {
+            System.out.println("Failed to connect Data Base");
+            return null;
+        }
+        return user;
     }
+
 
     public User updateUser(User user, Scanner scanner) {
         while (true) {
@@ -68,18 +149,75 @@ public class UserRepo {
             System.out.println("//SURER USER password super, ADMIN passwors admin//");
             String choice = scanner.nextLine().trim();
 
-            if (choice.equals("admin")) {
-                user.setRole(Role.ADMIN);
-                return user;
-            } else if (choice.equals("super")) {
-                user.setRole(Role.SUPER_USER);
-                return user;
-            } else if (choice.equals("OK")) {
-                return user;
-            } else {
-                continue;
+            switch (choice) {
+                case "admin":
+                    user.setRole(Role.ADMIN);
+                    return user;
+                case "super":
+                    user.setRole(Role.SUPER_USER);
+                    return user;
+                case "OK":
+                    return user;
             }
         }
     }
+
+    public List<User> findAllUsers() {
+        List<User> users = new ArrayList<>();
+        User user = null;
+        Role role = null;
+        try {
+            Connection connection = DriverManager.getConnection(this.url, this.user, this.password);
+            Statement statement = connection.createStatement();
+            String query = "SELECT * FROM userdb.usertable";
+            ResultSet resultSet = statement.executeQuery(query);
+
+            while (resultSet.next()) {
+                user = new User();
+                user.setLogin(resultSet.getString("login"));
+                user.setSurname(resultSet.getString("surname"));
+                user.setName(resultSet.getString("name"));
+                user.setAge(resultSet.getInt("age"));
+                switch (resultSet.getString("role")) {
+                    case "USER":
+                        role = Role.USER;
+                        break;
+                    case "SUPER_USER":
+                        role = Role.SUPER_USER;
+                        break;
+                    case "ADMIN":
+                        role = Role.ADMIN;
+                        break;
+                }
+                user.setRole(role);
+                users.add(user);
+            }
+            resultSet.close();
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+
+
+    private boolean checkLogin(String login) {
+        try {
+            Connection connection = DriverManager.getConnection(this.url, this.user, this.password);
+            Statement statement = connection.createStatement();
+            String query = "SELECT login FROM userdb.usertable";
+            ResultSet resultSet = statement.executeQuery(query);
+            while (resultSet.next()) {
+                if (login.equals(resultSet.getString("login"))) {
+                    return false;
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
 }
+
 

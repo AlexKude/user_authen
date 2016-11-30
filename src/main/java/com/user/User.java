@@ -8,16 +8,29 @@ import java.util.Date;
  * Created by Main Server on 24.11.2016.
  */
 public class User {
+    private String login;
     private String name;
     private String surname;
     private int age;
     private Role role = Role.USER;
 
-    public User(String name, String surname, Date dateOfBirth) {
+    public User() {
+    }
+
+    public User(String login, String name, String surname, Date dateOfBirth) {
+        this.login = login;
         this.name = name;
         this.surname = surname;
         Date date = new Date();
         this.age = date.getYear() - dateOfBirth.getYear();
+    }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
     }
 
     public String getName() {
@@ -36,11 +49,11 @@ public class User {
         this.surname = surname;
     }
 
-    public int age() {
+    public int getAge() {
         return age;
     }
 
-    public void age(int age) {
+    public void setAge(int age) {
         this.age = age;
     }
 
@@ -51,5 +64,16 @@ public class User {
     public void setRole(Role role) {
 
         this.role = role;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "login='" + login + '\'' +
+                ", name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+                ", age=" + age +
+                ", role=" + role +
+                '}';
     }
 }

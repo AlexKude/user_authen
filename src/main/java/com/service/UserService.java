@@ -18,7 +18,7 @@ public class UserService {
         init();
     }
 
-    public void init() {
+    private void init() {
         try {
             FileInputStream fis;
             fis = new FileInputStream("src/main/resources/config.properties");
@@ -26,6 +26,7 @@ public class UserService {
             properties.load(fis);
             skype_home = properties.getProperty("skype_home");
             internet_home = properties.getProperty("internet_home");
+            fis.close();
         } catch (IOException e) {
             System.out.println("Init error........ ");
             System.out.println("Pleas try again");
@@ -36,7 +37,7 @@ public class UserService {
 
     @UserRoleAnnotation({Role.USER, Role.SUPER_USER, Role.ADMIN})
     @ServiceName(name = "NOTEPAD")
-    public void StartNotePad() {
+    public void startNotePad() {
         try {
             run.exec("Notepad");
         } catch (IOException e) {
@@ -46,7 +47,7 @@ public class UserService {
 
     @UserRoleAnnotation({Role.USER, Role.SUPER_USER, Role.ADMIN})
     @ServiceName(name = "EXPLORER")
-    public void StartExplorer() {
+    public void startExplorer() {
         try {
             run.exec("explorer");
         } catch (IOException e) {
@@ -56,7 +57,7 @@ public class UserService {
 
     @UserRoleAnnotation({Role.ADMIN})
     @ServiceName(name = "CONTROL PANEL")
-    public void StartControlPanel() {
+    public void startControlPanel() {
         try {
             run.exec("control");
         } catch (IOException e) {
@@ -65,7 +66,7 @@ public class UserService {
     }
     @UserRoleAnnotation({Role.ADMIN})
     @ServiceName(name = "REGISTER EDITOR")
-    public void StartRegisterEditor() {
+    public void startRegisterEditor() {
         try {
             run.exec("regedit");
         } catch (IOException e) {
@@ -74,7 +75,7 @@ public class UserService {
     }
     @UserRoleAnnotation({Role.ADMIN})
     @ServiceName(name = "PERFORMANCE MONITOR")
-    public void StartPerformanceMonitor() {
+    public void startPerformanceMonitor() {
         try {
             run.exec("perfmon");
         } catch (IOException e) {
@@ -84,7 +85,7 @@ public class UserService {
     }
     @UserRoleAnnotation({Role.ADMIN})
     @ServiceName(name = "SYSTEM INFO")
-    public void StartSystemInfoMonitor() {
+    public void startSystemInfoMonitor() {
         try {
             run.exec("msinfo32");
         } catch (IOException e) {
@@ -94,7 +95,7 @@ public class UserService {
 
     @ServiceName(name = "SKYPE")
     @UserRoleAnnotation({Role.SUPER_USER, Role.ADMIN})
-    public void SkypeAccess() {
+    public void skypeAccess() {
         UserService userService = new UserService();
 
         try {
@@ -107,7 +108,7 @@ public class UserService {
 
     @UserRoleAnnotation({Role.SUPER_USER, Role.ADMIN})
     @ServiceName(name = "INTERNET")
-    public void InternetAccess() {
+    public void internetAccess() {
         UserService userService = new UserService();
 
         try {
