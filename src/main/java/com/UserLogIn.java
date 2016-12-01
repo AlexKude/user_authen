@@ -7,8 +7,11 @@ import com.service.UserRoleAnnotation;
 import com.service.UserService;
 import com.user.Role;
 import com.user.User;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +20,10 @@ import java.util.Scanner;
 /**
  * Created by Main Server on 25.11.2016.
  */
+@Service(value = "userLogIn")
 public class UserLogIn {
-
+    @Resource
+    @Qualifier(value = "postgresConnectorManager")
     private  ConnectManager connectManager;
 
 
@@ -33,8 +38,8 @@ public class UserLogIn {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("spring-context.xml");
-        UserLogIn logIn = context.getBean("userLogin", UserLogIn.class);
-        ConnectManager connectManager = context.getBean("connectManager", ConnectManager.class);
+        UserLogIn logIn = context.getBean("userLogIn", UserLogIn.class);
+
 
         while (true) {
             System.out.println("<=========================>");

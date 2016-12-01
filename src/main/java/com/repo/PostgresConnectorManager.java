@@ -2,6 +2,7 @@ package com.repo;
 
 import com.user.Role;
 import com.user.User;
+import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -17,6 +18,7 @@ import java.util.Scanner;
 /**
  * Created by Main Server on 26.11.2016.
  */
+@Repository(value = "postgresConnectorManager")
 public class PostgresConnectorManager implements ConnectManager {
 
     private String driver;
