@@ -91,7 +91,6 @@ public class UserLogIn {
             } else if (choice.equals("FIND")) {
                 user = connectManager.findUser(scanner);
                 if (user == null) {
-                    System.out.println("User not found");
                     continue;
                 }
                 break;

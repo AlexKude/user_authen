@@ -21,9 +21,15 @@ public class User {
         this.login = login;
         this.name = name;
         this.surname = surname;
-        Date date = new Date();
-        this.age = date.getYear() - dateOfBirth.getYear();
+        this.age = this.ageCalculation(dateOfBirth);
     }
+
+    public int ageCalculation(Date dateOfBirth){
+        Date date = new Date();
+        int age = date.getYear() - dateOfBirth.getYear();
+        return age;
+    }
+
 
     public String getLogin() {
         return login;
