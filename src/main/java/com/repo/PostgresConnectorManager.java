@@ -17,14 +17,14 @@ import java.util.Scanner;
 /**
  * Created by Main Server on 26.11.2016.
  */
-public class UserRepo {
+public class PostgresConnectorManager implements ConnectManager {
 
     private String driver;
     private String url;
     private String user;
     private String password;
 
-    public UserRepo() {
+    public PostgresConnectorManager() {
         init();
     }
 
@@ -41,6 +41,7 @@ public class UserRepo {
     }
 
 
+    @Override
     public User createUser(Scanner scanner) {
         System.out.println("Enter your login");
         String login = scanner.nextLine().trim();
@@ -86,6 +87,7 @@ public class UserRepo {
     }
 
 
+    @Override
     public User findUser(Scanner scanner) {
         Role role = null;
         User user = null;
@@ -141,6 +143,7 @@ public class UserRepo {
     }
 
 
+    @Override
     public User updateUser(User user, Scanner scanner) {
         while (true) {
             System.out.println("Your current Role is " + user.getRole());
@@ -162,6 +165,7 @@ public class UserRepo {
         }
     }
 
+    @Override
     public List<User> findAllUsers() {
         List<User> users = new ArrayList<>();
         User user = null;

@@ -1,11 +1,13 @@
 package com;
 
-import com.repo.UserRepo;
+import com.repo.ConnectManager;
+import com.repo.PostgresConnectorManager;
 import com.service.ServiceName;
 import com.service.UserRoleAnnotation;
 import com.service.UserService;
 import com.user.Role;
 import com.user.User;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -17,8 +19,22 @@ import java.util.Scanner;
  */
 public class UserLogIn {
 
+    private  ConnectManager connectManager;
+
+
+    public ConnectManager getConnectManager() {
+        return connectManager;
+    }
+
+    public void setConnectManager(ConnectManager connectManager) {
+        this.connectManager = connectManager;
+    }
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("spring-context.xml");
+        UserLogIn logIn = context.getBean("userLogin", UserLogIn.class);
+        ConnectManager connectManager = context.getBean("connectManager", ConnectManager.class);
 
         while (true) {
             System.out.println("<=========================>");
@@ -31,11 +47,10 @@ public class UserLogIn {
 
             switch (choice) {
                 case "LOGIN":
-                    login(scanner);
+                    logIn.login(scanner);
                     break;
                 case "LIST":
-                    UserRepo userRepo = new UserRepo();
-                    List<User> allUsers = userRepo.findAllUsers();
+                    List<User> allUsers = logIn.connectManager.findAllUsers();
                     if (allUsers.isEmpty()) {
                         System.out.println("No active users found");
                     } else {
@@ -51,10 +66,9 @@ public class UserLogIn {
     }
 
 
-    public static void login(Scanner scanner) {
+    public void login(Scanner scanner) {
 
         UserService userService = new UserService();
-        UserRepo repo = new UserRepo();
         User user = null;
         String choice = "";
 
@@ -64,13 +78,13 @@ public class UserLogIn {
             choice = scanner.nextLine().trim();
 
             if (choice.equals("CREATE")) {
-                user = repo.createUser(scanner);
+                user = connectManager.createUser(scanner);
                 if (user == null) {
                     continue;
                 }
                 break;
             } else if (choice.equals("FIND")) {
-                user = repo.findUser(scanner);
+                user = connectManager.findUser(scanner);
                 if (user == null) {
                     System.out.println("User not found");
                     continue;
