@@ -45,19 +45,32 @@ public class PostgresConnectorManager implements ConnectManager {
 
     @Override
     public User createUser(Scanner scanner) {
-        System.out.println("Enter your login");
-        String login = scanner.nextLine().trim();
+        String login = "";
+        String surname = "";
+        String name = "";
+        while (true) {
+            boolean flag = true;
+            System.out.println("Enter your login");
+            login = scanner.nextLine().trim();
+            flag = flag && UserValidation.loginCheck(login);
 
-        if (!checkLogin(login)) {
-            System.out.println("This login is already in use. Please try other one");
-            return null;
+            if (!checkLogin(login)) {
+                System.out.println("This login is already in use. Please try other one");
+                return null;
+            }
+
+            System.out.println("Enter your Family name");
+            surname = scanner.nextLine().trim();
+            flag = flag && UserValidation.nameCheck(surname);
+            System.out.println("Enter your First name");
+            name = scanner.nextLine().trim();
+            flag = flag && UserValidation.nameCheck(name);
+            if (flag != true){
+                System.out.println("Length of login must be from 5 to 10 letters");
+                System.out.println("For login and name use only letters");
+                System.out.println("Please try again");
+            } else break;
         }
-
-        System.out.println("Enter your Family name");
-        String surname = scanner.nextLine().trim();
-        System.out.println("Enter your First name");
-        String name = scanner.nextLine().trim();
-
         Date date = null;
         while (date == null) {
             System.out.println("Enter your Date of Birth - dd.MM.yyyy");

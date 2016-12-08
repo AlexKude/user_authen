@@ -1,5 +1,9 @@
 package com.user;
 
+import com.repo.UserValidation;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+
 import java.util.Date;
 
 
@@ -7,6 +11,7 @@ import java.util.Date;
 /**
  * Created by Main Server on 24.11.2016.
  */
+@RunWith(JUnit4.class)
 public class User {
     private String login;
     private String name;
@@ -21,14 +26,9 @@ public class User {
         this.login = login;
         this.name = name;
         this.surname = surname;
-        this.age = this.ageCalculation(dateOfBirth);
+        this.age = UserValidation.ageCalculation(dateOfBirth);
     }
 
-    public int ageCalculation(Date dateOfBirth){
-        Date date = new Date();
-        int age = date.getYear() - dateOfBirth.getYear();
-        return age;
-    }
 
 
     public String getLogin() {

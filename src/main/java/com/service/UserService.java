@@ -1,15 +1,37 @@
 package com.service;
 
+import com.UserLogIn;
+import com.repo.ConnectManager;
 import com.user.Role;
+import com.user.User;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 /**
  * Created by Main Server on 24.11.2016.
  */
+@Service(value = "userService")
 public class UserService {
+    @Resource
+    @Qualifier(value = "postgresConnectorManager")
+    private ConnectManager connectManager;
+
+    public ConnectManager getConnectManager() {
+        return connectManager;
+    }
+
+    public void setConnectManager(ConnectManager connectManager) {
+        this.connectManager = connectManager;
+    }
+
     private Runtime run = Runtime.getRuntime();
     private String skype_home;
     private String internet_home;
@@ -64,6 +86,7 @@ public class UserService {
             System.out.println("Control Panel failed to start");
         }
     }
+
     @UserRoleAnnotation({Role.ADMIN})
     @ServiceName(name = "REGISTER EDITOR")
     public void startRegisterEditor() {
@@ -73,6 +96,7 @@ public class UserService {
             System.out.println("Register Editor failed to start");
         }
     }
+
     @UserRoleAnnotation({Role.ADMIN})
     @ServiceName(name = "PERFORMANCE MONITOR")
     public void startPerformanceMonitor() {
@@ -83,6 +107,7 @@ public class UserService {
         }
 
     }
+
     @UserRoleAnnotation({Role.ADMIN})
     @ServiceName(name = "SYSTEM INFO")
     public void startSystemInfoMonitor() {
@@ -118,4 +143,39 @@ public class UserService {
         }
     }
 
+    @UserRoleAnnotation({Role.ADMIN})
+    @ServiceName(name = "USER STATISTICS")
+    public void userStatistics() {
+        List<Integer> age = new ArrayList<>();
+        int userCount = 0;
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("spring-context.xml");
+        UserService userService = context.getBean("userService", UserService.class);
+        List<User> allUsers = userService.connectManager.findAllUsers();
+        if (allUsers.isEmpty()) {
+            System.out.println("Something went wrong, please try again");
+            return;
+        }
+        for (User user : allUsers) {
+            ++userCount;
+            age.add(user.getAge());
+        }
+        int teenager = UserStatistics.teenagerCheck(age);
+        int youth = UserStatistics.youthCheck(age);
+        int middle = UserStatistics.middleageCheck(age);
+        int senior = UserStatistics.seniorsCheck(age);
+        int average = UserStatistics.averageAge(age);
+
+        System.out.println("USER STATISTICS");
+        System.out.println("TOTAL NUMBER OF USERS: " + userCount);
+        if (teenager != 0) System.out.println("NUMBER OF TEENAGERS: " + teenager);
+        if (youth != 0) System.out.println("NUMBER OF YOUNG PERSONS: " + youth);
+        if (middle != 0) System.out.println("NUMBER OF MIDDLE AGE: " + middle);
+        if (senior != 0) System.out.println("NUMBER OF SENIORS: " + senior);
+        System.out.println("AVERAGE AGE OF USERS: " + average);
+
+        context.close();
+    }
 }
+
+
+

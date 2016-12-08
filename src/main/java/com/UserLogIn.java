@@ -39,8 +39,6 @@ public class UserLogIn {
         Scanner scanner = new Scanner(System.in);
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("spring-context.xml");
         UserLogIn logIn = context.getBean("userLogIn", UserLogIn.class);
-
-
         while (true) {
             System.out.println("<=========================>");
             System.out.println("What would You like to do?");
@@ -65,6 +63,7 @@ public class UserLogIn {
                     }
                     break;
                 case "EXIT":
+                    context.close();
                     System.exit(0);
             }
         }
@@ -91,6 +90,7 @@ public class UserLogIn {
             } else if (choice.equals("FIND")) {
                 user = connectManager.findUser(scanner);
                 if (user == null) {
+                    System.out.println("User not found");
                     continue;
                 }
                 break;
